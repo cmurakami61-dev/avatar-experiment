@@ -9,7 +9,13 @@
 </head>
 <body></body>
 <script>
-  const jsPsych = initJsPsych();
+  // 画像リスト（すべて小文字・半角英数字に統一）
+  const image_list = ["e1.png", "p.png", "r.png", "s1.png", "s2.png", "s3.png", "s4.png", "s5.png", "s6.png", "s7.png"];
+  
+  // jsPsychの初期化（画像の事前読み込み設定）
+  const jsPsych = initJsPsych({
+    preload_images: image_list
+  });
 
   const welcome = {
     type: jsPsychHtmlKeyboardResponse,
@@ -31,13 +37,8 @@
     choices: ['Enter']
   };
 
-  // 画像リスト（10枚）
-  const images = ["enemy1モノ.PNG", "player.png", "ローブの男モノ.PNG", "科学者モノ.PNG",
-    "賢者モノ.PNG", "支配者モノ.PNG", "聖女モノ.PNG", "聖職者モノ.PNG",
-    "先導者モノ.PNG", "戦士モノ.PNG"];
-    
-  // 10枚をランダムにシャッフル
-  const shuffledImages = [...images].sort(() => Math.random() - 0.5);
+  // 画像をランダムにシャッフル（10枚ずつ）
+  const shuffledImages = [...image_list].sort(() => Math.random() - 0.5);
 
   let timeline = [welcome];
 
@@ -45,6 +46,7 @@
     // 4000ms〜5000msのランダムな待機時間
     const fixation_duration = Math.floor(Math.random() * (5000 - 4000 + 1) + 4000);
     
+    // 注視点
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
       stimulus: '<div style="font-size:60px;">+</div>',
