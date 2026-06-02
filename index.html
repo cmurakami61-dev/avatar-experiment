@@ -12,7 +12,7 @@
   // 画像リスト（すべて小文字・半角英数字で統一してください）
   const image_list = ["e1.png", "p.png", "r.png", "s1.png", "s2.png", "s3.png", "s4.png", "s5.png", "s6.png", "s7.png"];
   
-  // jsPsychの初期化（画像の事前読み込み設定）
+  // jsPsychの初期化
   const jsPsych = initJsPsych({
     preload_images: image_list
   });
@@ -30,7 +30,8 @@
         3. その後、質問ページへ切り替わりますので評価してください。<br>
         この手順を計10回繰り返します。</p>
         <p><strong>【回答方法】</strong><br>
-        回答は「1：全く当てはまらない」から「7：よく当てはまる」の7段階で評価してください。</p>
+        回答は「1：全く当てはまらない」から「7：よく当てはまる」の7段階で評価してください。<br>
+        ※すべての質問に回答しないと次の画面に進めません。</p>
         <p><strong>【留意事項】</strong><br>
         回答は直感に従ってください。途中で中止したい場合はいつでも終了して構いません。</p>
         <p style="text-align: center; color: blue;">準備ができましたら「Enter」キーを押してください。</p>
@@ -39,26 +40,20 @@
     choices: ['Enter']
   };
 
-  // 画像をランダムにシャッフル
   const shuffledImages = [...image_list].sort(() => Math.random() - 0.5);
-
-  // リッカート尺度のラベル設定（両端に説明を入れる）
   const likert_scale = ["1<br>全く当てはまらない", "2", "3", "4", "5", "6", "7<br>よく当てはまる"];
 
   let timeline = [welcome];
 
   shuffledImages.forEach(img => {
-    // 4000ms〜5000msのランダムな待機時間
     const fixation_duration = Math.floor(Math.random() * (5000 - 4000 + 1) + 4000);
     
-    // 注視点
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
       stimulus: '<div style="font-size:60px;">+</div>',
       trial_duration: fixation_duration
     });
     
-    // 画像提示 (1500ms = 1.5秒)
     timeline.push({
       type: jsPsychImageKeyboardResponse,
       stimulus: img,
@@ -66,18 +61,17 @@
       choices: "NO_KEYS"
     });
     
-    // 設問（ラベル付き）
+    // 設問（required: true を追加）
     timeline.push({
       type: jsPsychSurveyLikert,
       questions: [
-        {prompt: "このキャラクターは善人である", labels: likert_scale},
-        {prompt: "このキャラクターは悪人である", labels: likert_scale},
-        {prompt: "特徴の判断に迷った", labels: likert_scale}
+        {prompt: "このキャラクターは善人である", labels: likert_scale, required: true},
+        {prompt: "このキャラクターは悪人である", labels: likert_scale, required: true},
+        {prompt: "特徴の判断に迷った", labels: likert_scale, required: true}
       ]
     });
   });
 
-  // 完走時にCSVダウンロード
   jsPsych.run(timeline).then(() => {
     const data = jsPsych.data.get().csv();
     const blob = new Blob([data], { type: 'text/csv' });
