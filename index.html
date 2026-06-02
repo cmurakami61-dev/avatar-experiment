@@ -10,21 +10,65 @@
 <body></body>
 <script>
   const jsPsych = initJsPsych();
+
+  // 説明画面
+  const welcome = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div style="text-align: left; max-width: 600px; margin: 0 auto;">
+        <h2>実験の説明</h2>
+        <p>本日はアンケートにご協力いただきありがとうございます。<br>
+        本調査では、提示される画像に対する第一印象や、直感的な評価について調査します。</p>
+        <p><strong>【実験の流れ】</strong><br>
+        1. 画面中央に十字が5〜7秒間ランダムに表示されます。<br>
+        2. 続いて、キャラクター画像が1秒間表示されます。<br>
+        3. その後、質問ページへ切り替わりますので評価してください。<br>
+        この手順を計11回繰り返します。</p>
+        <p><strong>【留意事項】</strong><br>
+        回答は直感に従ってください。途中で中止したい場合はいつでも終了して構いません。</p>
+        <p style="text-align: center; color: blue;">準備ができましたら「Enter」キーを押してください。</p>
+      </div>
+    `,
+    choices: ['Enter']
+  };
+
   // 画像リスト
   const images = ["enemy1モノ.PNG", "player.PNG", "ローブの男モノ.PNG", "科学者モノ.PNG",
     "賢者モノ.PNG", "支配者モノ.PNG", "聖女モノ.PNG", "聖職者モノ.PNG",
     "先導者モノ.PNG", "洗車モノ.PNG"];
   const shuffledImages = [...images, ...images].sort(() => Math.random() - 0.5).slice(0, 11);
-  let timeline = [];
+
+  let timeline = [welcome];
+
   shuffledImages.forEach(img => {
-    timeline.push({ type: jsPsychHtmlKeyboardResponse, stimulus: '<div style="font-size:60px;">+</div>', trial_duration: 500 });
-    timeline.push({ type: jsPsychImageKeyboardResponse, stimulus: img, trial_duration: 500, choices: "NO_KEYS" });
-    timeline.push({ type: jsPsychSurveyLikert, questions: [
+    // 5000ms〜7000msのランダムな待機時間
+    const fixation_duration = Math.floor(Math.random() * (7000 - 5000 + 1) + 5000);
+    
+    timeline.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div style="font-size:60px;">+</div>',
+      trial_duration: fixation_duration
+    });
+    
+    // 画像提示 (1000ms = 1秒)
+    timeline.push({
+      type: jsPsychImageKeyboardResponse,
+      stimulus: img,
+      trial_duration: 1000,
+      choices: "NO_KEYS"
+    });
+    
+    // 設問
+    timeline.push({
+      type: jsPsychSurveyLikert,
+      questions: [
         {prompt: "このキャラクターは善人である", labels: ["1", "2", "3", "4", "5", "6", "7"]},
         {prompt: "このキャラクターは悪人である", labels: ["1", "2", "3", "4", "5", "6", "7"]},
         {prompt: "特徴の判断に迷った", labels: ["1", "2", "3", "4", "5", "6", "7"]}
-      ] });
+      ]
+    });
   });
+
   jsPsych.run(timeline);
 </script>
 </html>
