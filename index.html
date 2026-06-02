@@ -11,7 +11,6 @@
 <script>
   const jsPsych = initJsPsych();
 
-  // 説明画面
   const welcome = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
@@ -20,10 +19,10 @@
         <p>本日はアンケートにご協力いただきありがとうございます。<br>
         本調査では、提示される画像に対する第一印象や、直感的な評価について調査します。</p>
         <p><strong>【実験の流れ】</strong><br>
-        1. 画面中央に十字が5〜7秒間ランダムに表示されます。<br>
-        2. 続いて、キャラクター画像が1秒間表示されます。<br>
+        1. 画面中央に十字が4〜5秒間ランダムに表示されます。<br>
+        2. 続いて、キャラクター画像が1.5秒間表示されます。<br>
         3. その後、質問ページへ切り替わりますので評価してください。<br>
-        この手順を計11回繰り返します。</p>
+        この手順を計10回繰り返します。</p>
         <p><strong>【留意事項】</strong><br>
         回答は直感に従ってください。途中で中止したい場合はいつでも終了して構いません。</p>
         <p style="text-align: center; color: blue;">準備ができましたら「Enter」キーを押してください。</p>
@@ -32,16 +31,18 @@
     choices: ['Enter']
   };
 
-  // 画像リスト
+  // 画像リスト（10枚）
   const images = ["enemy1モノ.PNG", "player.PNG", "ローブの男モノ.PNG", "科学者モノ.PNG",
     "賢者モノ.PNG", "支配者モノ.PNG", "聖女モノ.PNG", "聖職者モノ.PNG",
     "先導者モノ.PNG", "洗車モノ.PNG"];
-  const shuffledImages = [...images, ...images].sort(() => Math.random() - 0.5).slice(0, 11);
+    
+  // 10枚をランダムにシャッフル
+  const shuffledImages = [...images].sort(() => Math.random() - 0.5);
 
   let timeline = [welcome];
 
   shuffledImages.forEach(img => {
-    // 5000ms〜7000msのランダムな待機時間
+    // 4000ms〜5000msのランダムな待機時間
     const fixation_duration = Math.floor(Math.random() * (5000 - 4000 + 1) + 4000);
     
     timeline.push({
@@ -50,11 +51,11 @@
       trial_duration: fixation_duration
     });
     
-    // 画像提示 (1000ms = 1秒)
+    // 画像提示 (1500ms = 1.5秒)
     timeline.push({
       type: jsPsychImageKeyboardResponse,
       stimulus: img,
-      trial_duration: 1000,
+      trial_duration: 1500,
       choices: "NO_KEYS"
     });
     
@@ -69,6 +70,15 @@
     });
   });
 
-  jsPsych.run(timeline);
+  // 完走時にCSVダウンロード
+  jsPsych.run(timeline).then(() => {
+    const data = jsPsych.data.get().csv();
+    const blob = new Blob([data], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'experiment_results.csv';
+    a.click();
+  });
 </script>
 </html>
