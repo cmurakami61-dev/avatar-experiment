@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Avatar Perception Experiment</title>
+  <script src="https://unpkg.com/jspsych@7.3.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.2"></script>
+  <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
+</head>
+<body></body>
+<script>
+  const jsPsych = initJsPsych();
+
+  // 1. 画像リストの定義
+  const images = [
+    "enemy1モノ.PNG", "player.PNG", "ローブの男モノ.PNG", "科学者モノ.PNG",
+    "賢者モノ.PNG", "支配者モノ.PNG", "聖女モノ.PNG", "聖職者モノ.PNG",
+    "先導者モノ.PNG", "洗車モノ.PNG"
+  ];
+  // 11回にするため、リストを複製してシャッフルし、最初の11個を取る
+  const shuffledImages = [...images, ...images].sort(() => Math.random() - 0.5).slice(0, 11);
+
+  // 2. タイムラインの構築
+  let timeline = [];
+
+  shuffledImages.forEach(img => {
+    // 注視点
+    timeline.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div style="font-size:60px;">+</div>',
+      trial_duration: 500
+    });
+    // 画像提示
+    timeline.push({
+      type: jsPsychImageKeyboardResponse,
+      stimulus: img,
+      trial_duration: 500,
+      choices: "NO_KEYS"
+    });
+    // 設問回答
+    timeline.push({
+      type: jsPsychSurveyLikert,
+      questions: [
+        {prompt: "このキャラクターは善人である", labels: ["1", "2", "3", "4", "5", "6", "7"]},
+        {prompt: "このキャラクターは悪人である", labels: ["1", "2", "3", "4", "5", "6", "7"]},
+        {prompt: "特徴の判断に迷った", labels: ["1", "2", "3", "4", "5", "6", "7"]}
+      ]
+    });
+  });
+
+  // 3. 実験開始
+  jsPsych.run(timeline);
+</script>
+</html>
