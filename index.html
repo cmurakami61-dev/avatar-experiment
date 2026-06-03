@@ -12,7 +12,7 @@
   // 画像リスト（すべて小文字・半角英数字で統一してください）
   const image_list = ["e1.png", "p.png", "r.png", "s1.png", "s2.png", "s3.png", "s4.png", "s5.png", "s6.png", "s7.png"];
   
-  // jsPsychの初期化
+  // jsPsychの初期化（画像の事前読み込み設定）
   const jsPsych = initJsPsych({
     preload_images: image_list
   });
@@ -25,7 +25,7 @@
         <p>本日はアンケートにご協力いただきありがとうございます。<br>
         本調査では、提示される画像に対する第一印象や、直感的な評価について調査します。</p>
         <p><strong>【実験の流れ】</strong><br>
-        1. 画面中央に十字が4〜5秒間ランダムに表示されます。<br>
+        1. 画面中央に十字が1秒間表示されます。<br>
         2. 続いて、キャラクター画像が1.5秒間表示されます。<br>
         3. その後、質問ページへ切り替わりますので評価してください。<br>
         この手順を計10回繰り返します。</p>
@@ -40,20 +40,26 @@
     choices: ['Enter']
   };
 
+  // 画像をランダムにシャッフル
   const shuffledImages = [...image_list].sort(() => Math.random() - 0.5);
+  
+  // リッカート尺度のラベル設定
   const likert_scale = ["1<br>全く当てはまらない", "2", "3", "4", "5", "6", "7<br>よく当てはまる"];
 
   let timeline = [welcome];
 
   shuffledImages.forEach(img => {
-    const fixation_duration = Math.floor(Math.random() * (5000 - 4000 + 1) + 4000);
+    // 2秒固定の待機時間
+    const fixation_duration = 2000;
     
+    // 注視点
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
       stimulus: '<div style="font-size:60px;">+</div>',
       trial_duration: fixation_duration
     });
     
+    // 画像提示 (1500ms = 1.5秒)
     timeline.push({
       type: jsPsychImageKeyboardResponse,
       stimulus: img,
@@ -61,7 +67,7 @@
       choices: "NO_KEYS"
     });
     
-    // 設問（required: true を追加）
+    // 設問（回答必須設定）
     timeline.push({
       type: jsPsychSurveyLikert,
       questions: [
@@ -72,6 +78,7 @@
     });
   });
 
+  // 完走時にCSVダウンロード
   jsPsych.run(timeline).then(() => {
     const data = jsPsych.data.get().csv();
     const blob = new Blob([data], { type: 'text/csv' });
