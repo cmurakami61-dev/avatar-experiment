@@ -5,18 +5,18 @@
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.2"></script>
   <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
 </head>
 <body></body>
 <script>
-  // 画像リスト（すべて小文字・半角英数字で統一してください）
   const image_list = ["e1.png", "p.png", "r.png", "s1.png", "s2.png", "s3.png", "s4.png", "s5.png", "s6.png", "s7.png"];
   
-  // jsPsychの初期化（画像の事前読み込み設定）
   const jsPsych = initJsPsych({
     preload_images: image_list
   });
 
+  // 1. 説明画面
   const welcome = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
@@ -25,14 +25,13 @@
         <p>本日はアンケートにご協力いただきありがとうございます。<br>
         本調査では、提示される画像に対する第一印象や、直感的な評価について調査します。</p>
         <p><strong>【実験の流れ】</strong><br>
-        1. 画面中央に十字が1秒間表示されます。<br>
-        2. 続いて、キャラクター画像が1.5秒間表示されます。<br>
-        3. その後、質問ページへ切り替わりますので評価してください。<br>
+        1. 年齢と性別をご回答いただきます。<br>
+        2. 画面中央に十字が1秒間表示されます。<br>
+        3. 続いて、キャラクター画像が1.5秒間表示されます。<br>
+        4. 画像に対する印象を評価してください。<br>
         この手順を計10回繰り返します。</p>
-        <p><strong>【回答方法】</strong><br>
-        回答は「1：全く当てはまらない」から「7：よく当てはまる」の7段階で評価してください。<br>
-        ※すべての質問に回答しないと次の画面に進めません。</p>
         <p><strong>【留意事項】</strong><br>
+        本回答で得られたデータは本研究目的にのみ使用されます。個人が特定されることはありません。<br>
         回答は直感に従ってください。途中で中止したい場合はいつでも終了して構いません。</p>
         <p style="text-align: center; color: blue;">準備ができましたら「Enter」キーを押してください。</p>
       </div>
@@ -40,26 +39,27 @@
     choices: ['Enter']
   };
 
-  // 画像をランダムにシャッフル
+  // 2. 年齢・性別の取得
+  const demographics = {
+    type: jsPsychSurveyText,
+    questions: [
+      {prompt: "年齢を教えてください", name: "age", required: true},
+      {prompt: "性別を教えてください（例：男性、女性、その他）", name: "gender", required: true}
+    ]
+  };
+
   const shuffledImages = [...image_list].sort(() => Math.random() - 0.5);
-  
-  // リッカート尺度のラベル設定
   const likert_scale = ["1<br>全く当てはまらない", "2", "3", "4", "5", "6", "7<br>よく当てはまる"];
 
-  let timeline = [welcome];
+  let timeline = [welcome, demographics];
 
   shuffledImages.forEach(img => {
-    // 2秒固定の待機時間
-    const fixation_duration = 2000;
-    
-    // 注視点
     timeline.push({
       type: jsPsychHtmlKeyboardResponse,
       stimulus: '<div style="font-size:60px;">+</div>',
-      trial_duration: fixation_duration
+      trial_duration: 1000
     });
     
-    // 画像提示 (1500ms = 1.5秒)
     timeline.push({
       type: jsPsychImageKeyboardResponse,
       stimulus: img,
@@ -67,7 +67,6 @@
       choices: "NO_KEYS"
     });
     
-    // 設問（回答必須設定）
     timeline.push({
       type: jsPsychSurveyLikert,
       questions: [
@@ -78,7 +77,6 @@
     });
   });
 
-  // 完走時にCSVダウンロード
   jsPsych.run(timeline).then(() => {
     const data = jsPsych.data.get().csv();
     const blob = new Blob([data], { type: 'text/csv' });
