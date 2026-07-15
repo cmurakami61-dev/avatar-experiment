@@ -4,87 +4,48 @@
   <script src="https://unpkg.com/jspsych@7.3.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.2"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.1.2"></script>
   <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
 </head>
 <body></body>
 <script>
-  const image_list = ["e1.png", "p.png", "r.png", "s1.png", "s2.png", "s3.png", "s4.png", "s5.png", "s6.png", "s7.png"];
-  
-  const jsPsych = initJsPsych({
-    preload_images: image_list
-  });
+  // 【ここを編集すれば、画像と設問を自由に追加・変更できます】
+  const experiment_list = [
+    { image: "face1.png", prompt: "この人物は公正な人物である" },
+    { image: "face1.png", prompt: "この人物は誠実な人物である" },
+    { image: "face2.png", prompt: "この人物は公正な人物である" }
+  ];
 
-  // 1. 説明画面
-  const welcome = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `
-      <div style="text-align: left; max-width: 600px; margin: 0 auto;">
-        <h2>実験の説明</h2>
-        <p>本日はアンケートにご協力いただきありがとうございます。<br>
-        本調査では、提示される画像に対する第一印象や、直感的な評価について調査します。</p>
-        <p><strong>【実験の流れ】</strong><br>
-        1. 年齢と性別をご回答いただきます。<br>
-        2. 画面中央に十字が1秒間表示されます。<br>
-        3. 続いて、キャラクター画像が1.5秒間表示されます。<br>
-        4. 画像に対する印象を評価してください。<br>
-        この手順を計10回繰り返します。</p>
-        <p><strong>【留意事項】</strong><br>
-        本回答で得られたデータは本研究目的にのみ使用されます。個人が特定されることはありません。<br>
-        回答は直感に従ってください。途中で中止したい場合はいつでも終了して構いません。</p>
-        <p style="text-align: center; color: blue;">準備ができましたら「Enter」キーを押してください。</p>
-      </div>
-    `,
-    choices: ['Enter']
-  };
+  const jsPsych = initJsPsych();
 
-  // 2. 年齢・性別の取得
-  const demographics = {
-    type: jsPsychSurveyText,
-    questions: [
-      {prompt: "年齢を教えてください", name: "age", required: true},
-      {prompt: "性別を教えてください（例：男性、女性、その他）", name: "gender", required: true}
-    ]
-  };
+  let timeline = [];
 
-  const shuffledImages = [...image_list].sort(() => Math.random() - 0.5);
-  const likert_scale = ["1<br>全く当てはまらない", "2", "3", "4", "5", "6", "7<br>よく当てはまる"];
-
-  let timeline = [welcome, demographics];
-
-  shuffledImages.forEach(img => {
-    timeline.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: '<div style="font-size:60px;">+</div>',
-      trial_duration: 1000
-    });
-    
+  experiment_list.forEach(item => {
+    // 画像提示
     timeline.push({
       type: jsPsychImageKeyboardResponse,
-      stimulus: img,
-      trial_duration: 1500,
-      choices: "NO_KEYS"
+      stimulus: item.image,
+      choices: "NO_KEYS",
+      trial_duration: 3000 // 3秒間提示
     });
-    
+
+    // スライダー（VAS）付き設問
     timeline.push({
-      type: jsPsychSurveyLikert,
-      questions: [
-        {prompt: "このキャラクターは善人である", labels: likert_scale, required: true},
-        {prompt: "このキャラクターは悪人である", labels: likert_scale, required: true},
-        {prompt: "特徴の判断に迷った", labels: likert_scale, required: true}
-      ]
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<img src="${item.image}" style="width:200px;"><p><strong>${item.prompt}</strong></p>`,
+      html: `
+        <div style="width:300px; margin:auto;">
+          <input type="range" name="vas" value="50" min="0" max="100" style="width:100%;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>0<br>全く当てはまらない</span>
+            <span>100<br>よく当てはまる</span>
+          </div>
+        </div>
+      `,
+      button_label: '次へ'
     });
   });
 
-  jsPsych.run(timeline).then(() => {
-    const data = jsPsych.data.get().csv();
-    const blob = new Blob([data], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'experiment_results.csv';
-    a.click();
-  });
+  jsPsych.run(timeline);
 </script>
 </html>
