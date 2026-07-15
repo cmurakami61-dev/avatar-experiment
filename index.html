@@ -4,12 +4,17 @@
   <script src="https://unpkg.com/jspsych@7.3.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
+  <!-- ここが重要：survey-html-form プラグインを読み込む記述を追加 -->
   <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.1.2"></script>
+  
   <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
 </head>
 <body></body>
 <script>
-  // 【重要】画像ファイル名が正しいか今一度確認してください
+  // 1. jsPsychの初期化を先に行う
+  const jsPsych = initJsPsych();
+
+  // 2. 画像リスト
   const experiment_list = [
     { image: "face1.png", prompt: "この人物は公正な人物である" },
     { image: "face1.png", prompt: "この人物は誠実な人物である" },
@@ -23,15 +28,10 @@
     { image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
   ];
 
-  // 画像を事前に読み込む設定（これで真っ白を回避します）
-  const jsPsych = initJsPsych({
-    preload_images: ["face1.png", "face2.png"]
-  });
-
   let timeline = [];
 
   experiment_list.forEach(item => {
-    // 1. 画像提示
+    // 3. 画像提示
     timeline.push({
       type: jsPsychImageKeyboardResponse,
       stimulus: item.image,
@@ -39,7 +39,7 @@
       trial_duration: 3000
     });
 
-    // 2. スライダー付き設問
+    // 4. スライダー付き設問
     timeline.push({
       type: jsPsychSurveyHtmlForm,
       preamble: `<p><strong>${item.prompt}</strong></p>`,
@@ -56,6 +56,7 @@
     });
   });
 
+  // 5. 実行
   jsPsych.run(timeline);
 </script>
 </html>
