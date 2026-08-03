@@ -4,7 +4,7 @@
   <script src="https://unpkg.com/jspsych@7.3.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
   <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
 </head>
 <body></body>
@@ -12,7 +12,7 @@
   // jsPsychインスタンスの作成
   const jsPsych = initJsPsych();
 
-  // 画像と設問のリスト
+  // 画像と設問のリスト（ここを自由に増やせます）
   const experiment_list = [
     { image: "face1.png", prompt: "この人物は公正な人物である" },
     { image: "face1.png", prompt: "この人物は誠実な人物である" },
@@ -29,7 +29,7 @@
   let timeline = [];
 
   experiment_list.forEach(item => {
-    // 画像提示
+    // 1. 画像提示 (3秒間)
     timeline.push({
       type: jsPsychImageKeyboardResponse,
       stimulus: item.image,
@@ -37,20 +37,28 @@
       trial_duration: 3000
     });
 
-    // スライダー付き設問
+    // 2. スライダー付き設問（HTMLボタン応答プラグインで代用して確実に動作させます）
     timeline.push({
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<p><strong>${item.prompt}</strong></p>`,
-      html: `
-        <div style="width:300px; margin:auto;">
-          <input type="range" name="vas" value="50" min="0" max="100" style="width:100%;">
-          <div style="display:flex; justify-content:space-between;">
-            <span>0<br>全く当てはまらない</span>
-            <span>100<br>よく当てはまる</span>
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <div style="max-width: 400px; margin: auto; text-align: center;">
+          <p style="font-size: 18px; font-weight: bold;">${item.prompt}</p>
+          <div style="margin: 30px 0;">
+            <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px;">
+              <span>0<br>全く当てはまらない</span>
+              <span>100<br>よく当てはまる</span>
+            </div>
           </div>
         </div>
       `,
-      button_label: '次へ'
+      choices: ['次へ'],
+      // スライダーで動かした値を取得して保存する処理
+      on_finish: function(data) {
+        // スライダーの現在の値を取得（デフォルトは50）
+        const slider = document.getElementById('vas-slider');
+        data.vas_response = slider ? slider.value : 50;
+      }
     });
   });
 
