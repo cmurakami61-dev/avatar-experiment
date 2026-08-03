@@ -4,7 +4,8 @@
   <script src="https://unpkg.com/jspsych@7.3.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+  <!-- ボタン用プラグインの代わりにキー/HTML応答プラグインを使用します -->
   <link href="https://unpkg.com/@jspsych/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
   <style>
     /* 画面全体を完全に中央配置 */
@@ -14,24 +15,24 @@
       justify-content: center !important;
       min-height: 100vh !important;
     }
-    /* jsPsychのコンテンツ幅を固定し、内部を強制的に中央揃えにする */
     .jspsych-content {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
       justify-content: center !important;
     }
-    /* ボタンを完全に中央に配置するスタイル */
-    .jspsych-html-button-response-btngroup {
-      display: flex !important;
-      justify-content: center !important;
-      width: 100% !important;
-      margin-top: 25px !important;
-    }
-    .jspsych-html-button-response-button button {
-      cursor: pointer;
+    /* 自作の次へボタンのスタイル */
+    .next-btn {
+      background-color: #f8f9fa;
+      border: 1px solid #ccc;
       padding: 10px 40px;
       font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .next-btn:hover {
+      background-color: #e2e6ea;
     }
   </style>
 </head>
@@ -45,10 +46,10 @@
     { image: "face1.png", prompt: "この人物は誠実な人物である" },
     { image: "face1.png", prompt: "この人物は信頼できる人物である" },
     { image: "face1.png", prompt: "この人物は親切な人物である" },
-    { image: "face1.png", prompt: "この人物は忠誠心のある人物である" },
-    { image: "face2.png", prompt: "This人物は公正な人物である" },
+    { image: "face1.png", prompt: "This人物は忠誠心のある人物である" },
+    { image: "face2.png", prompt: "この人物は公正な人物である" },
     { image: "face2.png", prompt: "この人物は誠実な人物である" },
-    { image: "face2.png", prompt: "この人物は信頼できる人物である" },
+    { image: "face2.png", prompt: "ఈ人物は信頼できる人物である" },
     { image: "face2.png", prompt: "この人物は親切な人物である" },
     { image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
   ];
@@ -57,7 +58,7 @@
 
   experiment_list.forEach(item => {
     timeline.push({
-      type: jsPsychHtmlButtonResponse,
+      type: jsPsychHtmlKeyboardResponse, // キーボード応答プラグインをベースにしつつHTMLで完全構築
       stimulus: `
         <div style="width: 350px; margin: 0 auto; text-align: center;">
           <!-- 顔画像（上部） -->
@@ -69,7 +70,7 @@
           <p style="font-size: 18px; font-weight: bold; margin-bottom: 30px; width: 100%;">${item.prompt}</p>
           
           <!-- スライダー部分 -->
-          <div style="width: 100%;">
+          <div style="width: 100%; margin-bottom: 25px;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
             
             <!-- 0 と 100 をスライダーの両端に配置 -->
@@ -84,14 +85,27 @@
               <span style="transform: translateX(35%);">よく当てはまる</span>
             </div>
           </div>
+
+          <!-- 完全な中央に配置された「次へ」ボタン -->
+          <div>
+            <button type="button" id="next-button" class="next-btn">次へ</button>
+          </div>
         </div>
       `,
-      choices: ['次へ'],
-      on_finish: function(data) {
+      choices: "NO_KEYS", // キーボード入力を無効化し、ボタンクリックで進行させる
+      on_load: function() {
+        // ボタンがクリックされたときの処理を定義
+        const btn = document.getElementById('next-button');
         const slider = document.getElementById('vas-slider');
-        data.vas_response = slider ? slider.value : 50;
-        data.target_image = item.image;
-        data.question_prompt = item.prompt;
+        
+        btn.addEventListener('click', function() {
+          // データを記録して次の試行へ進む
+          jsPsych.finishTrial({
+            vas_response: slider ? slider.value : 50,
+            target_image: item.image,
+            question_prompt: item.prompt
+          });
+        });
       }
     });
   });
