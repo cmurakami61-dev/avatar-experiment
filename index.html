@@ -38,79 +38,114 @@
 <script>
   const jsPsych = initJsPsych();
 
-  // 画像と設問のリスト（ここを自由に増やせます）
+  // 画像と設問のリスト（6番目にアテンション・チェック問題を追加）
   const experiment_list = [
-    { image: "face1.png", prompt: "この人物は公正な人物である" },
-    { image: "face1.png", prompt: "この人物は誠実な人物である" },
-    { image: "face1.png", prompt: "この人物は信頼できる人物である" },
-    { image: "face1.png", prompt: "この人物は親切な人物である" },
-    { image: "face1.png", prompt: "この人物は忠誠心のある人物である" },
-    { image: "face2.png", prompt: "この人物は公正な人物である" },
-    { image: "face2.png", prompt: "この人物は誠実な人物である" },
-    { image: "face2.png", prompt: "この人物は信頼できる人物である" },
-    { image: "face2.png", prompt: "この人物は親切な人物である" },
-    { image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
+    { type: "face", image: "face1.png", prompt: "この人物は公正な人物である" },
+    { type: "face", image: "face1.png", prompt: "この人物は誠実な人物である" },
+    { type: "face", image: "face1.png", prompt: "この人物は信頼できる人物である" },
+    { type: "face", image: "face1.png", prompt: "この人物は親切な人物である" },
+    { type: "face", image: "face1.png", prompt: "この人物は忠誠心のある人物である" },
+    // --- 【6番目】アテンション・チェック問題 ---
+    { type: "check", prompt: "ここではスライダーを操作して「75」となるように回答してください。" },
+    // ----------------------------------------
+    { type: "face", image: "face2.png", prompt: "この人物は公正な人物である" },
+    { type: "face", image: "face2.png", prompt: "この人物は誠実な人物である" },
+    { type: "face", image: "face2.png", prompt: "この人物は信頼できる人物である" },
+    { type: "face", image: "face2.png", prompt: "この人物は親切な人物である" },
+    { type: "face", image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
   ];
 
   let timeline = [];
 
   experiment_list.forEach(item => {
-    timeline.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `
-        <div style="width: 350px; margin: 0 auto; text-align: center;">
-          <!-- 顔画像（上部） -->
-          <div style="margin-bottom: 20px;">
-            <img src="${item.image}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 4px;">
-          </div>
+    // 画面に表示するHTMLを「通常の問題」と「チェック問題」で分岐させます
+    let stimulus_html = "";
+
+    if (item.type === "check") {
+      // チェック問題用のレイアウト（画像なし、特別な教示文）
+      stimulus_html = `
+        <div style="width: 380px; margin: 0 auto; text-align: center;">
+          <!-- 教示文を目立つように表示 -->
+          <p style="font-size: 17px; font-weight: bold; line-height: 1.5; margin-bottom: 30px; width: 100%; color: #d9534f;">${item.prompt}</p>
           
-          <!-- 質問文 -->
-          <p style="font-size: 18px; font-weight: bold; margin-bottom: 25px; width: 100%;">${item.prompt}</p>
-          
-          <!-- 現在の選択値をリアルタイム表示するエリア -->
+          <!-- 現在の選択値リアルタイム表示 -->
           <div style="margin-bottom: 10px; font-size: 16px; font-weight: bold; color: #0066cc;">
-            <span id="slider-value">50</span>
+            選択値: <span id="slider-value">50</span>
           </div>
 
           <!-- スライダー部分 -->
           <div style="width: 100%; margin-bottom: 25px;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
             
-            <!-- 0 と 100 をスライダーの両端に配置 -->
             <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 5px; width: 100%;">
               <span>0</span>
               <span>100</span>
             </div>
             
-            <!-- 全く当てはまらない / よく当てはまる の中心を0と100の真下に合わせる -->
             <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px; width: 100%;">
               <span style="transform: translateX(-35%);">全く当てはまらない</span>
               <span style="transform: translateX(35%);">よく当てはまる</span>
             </div>
           </div>
 
-          <!-- 完全な中央に配置された「次へ」ボタン -->
           <div>
             <button type="button" id="next-button" class="next-btn">次へ</button>
           </div>
         </div>
-      `,
+      `;
+    } else {
+      // 通常の問題用のレイアウト（顔画像あり）
+      stimulus_html = `
+        <div style="width: 350px; margin: 0 auto; text-align: center;">
+          <div style="margin-bottom: 20px;">
+            <img src="${item.image}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 4px;">
+          </div>
+          
+          <p style="font-size: 18px; font-weight: bold; margin-bottom: 25px; width: 100%;">${item.prompt}</p>
+          
+          <div style="margin-bottom: 10px; font-size: 16px; font-weight: bold; color: #0066cc;">
+            選択値: <span id="slider-value">50</span>
+          </div>
+
+          <div style="width: 100%; margin-bottom: 25px;">
+            <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
+            
+            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 5px; width: 100%;">
+              <span>0</span>
+              <span>100</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px; width: 100%;">
+              <span style="transform: translateX(-35%);">全く当てはまらない</span>
+              <span style="transform: translateX(35%);">よく当てはまる</span>
+            </div>
+          </div>
+
+          <div>
+            <button type="button" id="next-button" class="next-btn">次へ</button>
+          </div>
+        </div>
+      `;
+    }
+
+    timeline.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: stimulus_html,
       choices: "NO_KEYS",
       on_load: function() {
         const slider = document.getElementById('vas-slider');
         const valueDisplay = document.getElementById('slider-value');
         const btn = document.getElementById('next-button');
 
-        // スライダーを動かしたときに数値をリアルタイムで更新
         slider.addEventListener('input', function() {
           valueDisplay.textContent = slider.value;
         });
 
-        // ボタンがクリックされたときの処理
         btn.addEventListener('click', function() {
           jsPsych.finishTrial({
+            trial_type_check: item.type === "check" ? "attention_check" : "normal",
             vas_response: slider ? slider.value : 50,
-            target_image: item.image,
+            target_image: item.image || "none",
             question_prompt: item.prompt
           });
         });
