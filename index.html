@@ -12,7 +12,11 @@
   // 1. jsPsychインスタンスの作成
   const jsPsych = initJsPsych();
 
-  // 2. 画像リスト
+  // 2. プラグインの参照を正しく割り当て
+  const jsPsychModuleImageKeyboardResponse = jsPsychImageKeyboardResponse;
+  const jsPsychModuleSurveyHtmlForm = jsPsychSurveyHtmlForm;
+
+  // 3. 画像リスト
   const experiment_list = [
     { image: "face1.png", prompt: "この人物は公正な人物である" },
     { image: "face1.png", prompt: "この人物は誠実な人物である" },
@@ -22,24 +26,24 @@
     { image: "face2.png", prompt: "この人物は公正な人物である" },
     { image: "face2.png", prompt: "この人物は誠実な人物である" },
     { image: "face2.png", prompt: "この人物は信頼できる人物である" },
-    { image: "face2.png", prompt: "この人物は親切な人物である" },
+    { image: "face2.png", prompt: "This人物は親切な人物である" },
     { image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
   ];
 
   let timeline = [];
 
   experiment_list.forEach(item => {
-    // 3. 画像提示
+    // 4. 画像提示
     timeline.push({
-      type: jsPsychModuleImageKeyboardResponse, // 修正箇所：プラグインの参照方法をより明確に
+      type: jsPsychModuleImageKeyboardResponse,
       stimulus: item.image,
       choices: "NO_KEYS",
       trial_duration: 3000
     });
 
-    // 4. スライダー付き設問
+    // 5. スライダー付き設問
     timeline.push({
-      type: jsPsychModuleSurveyHtmlForm, // 修正箇所
+      type: jsPsychModuleSurveyHtmlForm,
       preamble: `<p><strong>${item.prompt}</strong></p>`,
       html: `
         <div style="width:300px; margin:auto;">
@@ -54,10 +58,7 @@
     });
   });
 
-  // jsPsych7系でのプラグイン変数名へのエイリアス設定
-  const jsPsychModuleImageKeyboardResponse = jsPsychImageKeyboardResponse;
-  const jsPsychModuleSurveyHtmlForm = jsPsychSurveyHtmlForm;
-
+  // 6. 実行
   jsPsych.run(timeline);
 </script>
 </html>
