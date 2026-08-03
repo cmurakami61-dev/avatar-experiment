@@ -4,14 +4,12 @@
   <script src="https://unpkg.com/jspsych@7.3.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
-  <!-- ここが重要：survey-html-form プラグインを読み込む記述を追加 -->
   <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.1.2"></script>
-  
   <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
 </head>
 <body></body>
 <script>
-  // 1. jsPsychの初期化を先に行う
+  // 1. jsPsychインスタンスの作成
   const jsPsych = initJsPsych();
 
   // 2. 画像リスト
@@ -33,7 +31,7 @@
   experiment_list.forEach(item => {
     // 3. 画像提示
     timeline.push({
-      type: jsPsychImageKeyboardResponse,
+      type: jsPsychModuleImageKeyboardResponse, // 修正箇所：プラグインの参照方法をより明確に
       stimulus: item.image,
       choices: "NO_KEYS",
       trial_duration: 3000
@@ -41,7 +39,7 @@
 
     // 4. スライダー付き設問
     timeline.push({
-      type: jsPsychSurveyHtmlForm,
+      type: jsPsychModuleSurveyHtmlForm, // 修正箇所
       preamble: `<p><strong>${item.prompt}</strong></p>`,
       html: `
         <div style="width:300px; margin:auto;">
@@ -56,7 +54,10 @@
     });
   });
 
-  // 5. 実行
+  // jsPsych7系でのプラグイン変数名へのエイリアス設定
+  const jsPsychModuleImageKeyboardResponse = jsPsychImageKeyboardResponse;
+  const jsPsychModuleSurveyHtmlForm = jsPsychSurveyHtmlForm;
+
   jsPsych.run(timeline);
 </script>
 </html>
