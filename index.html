@@ -7,21 +7,22 @@
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
   <link href="https://unpkg.com/@jspsych/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
   <style>
-    /* 全体を画面中央に寄せるためのスタイル */
+    /* 全体を画面中央に寄せる */
     .jspsych-content-wrapper {
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       min-height: 100vh !important;
     }
-    /* 「次へ」ボタンを中央に配置するスタイル */
-    .jspsych-html-button-response-button {
-      text-align: center !important;
-      margin-top: 20px;
+    /* ボタンエリア全体を完全に中央に固定 */
+    .jspsych-html-button-response-btngroup {
+      display: flex !important;
+      justify-content: center !important;
+      margin-top: 25px !important;
     }
     .jspsych-html-button-response-button button {
       cursor: pointer;
-      padding: 10px 30px;
+      padding: 10px 35px;
       font-size: 16px;
     }
   </style>
