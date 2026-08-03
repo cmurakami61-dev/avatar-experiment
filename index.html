@@ -5,9 +5,26 @@
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
-  <link href="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2/css/jspsych.css" rel="stylesheet" type="text/css">
-  <link href="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2/css/jspsych.css" rel="stylesheet" type="text/css">
   <link href="https://unpkg.com/@jspsych/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
+  <style>
+    /* 全体を画面中央に寄せるためのスタイル */
+    .jspsych-content-wrapper {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 100vh !important;
+    }
+    /* 「次へ」ボタンを中央に配置するスタイル */
+    .jspsych-html-button-response-button {
+      text-align: center !important;
+      margin-top: 20px;
+    }
+    .jspsych-html-button-response-button button {
+      cursor: pointer;
+      padding: 10px 30px;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body></body>
 <script>
@@ -30,7 +47,6 @@
   let timeline = [];
 
   experiment_list.forEach(item => {
-    // 1つの試行に「顔画像」「質問」「スライダー」をすべてまとめました
     timeline.push({
       type: jsPsychHtmlButtonResponse,
       stimulus: `
@@ -44,7 +60,7 @@
           <p style="font-size: 18px; font-weight: bold; margin-bottom: 30px;">${item.prompt}</p>
           
           <!-- スライダー部分 -->
-          <div style="margin: 0 auto 30px auto; width: 350px;">
+          <div style="margin: 0 auto; width: 350px;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
             
             <!-- 0 と 100 をスライダーの両端に配置 -->
@@ -53,16 +69,15 @@
               <span>100</span>
             </div>
             
-            <!-- 全く当てはまらない / よく当てはまる を左右に配置 -->
+            <!-- 全く当てはまらない / よく当てはまる の中心を0と100の真下に合わせる -->
             <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px;">
-              <span>全く当てはまらない</span>
-              <span>よく当てはまる</span>
+              <span style="transform: translateX(-35%);">全く当てはまらない</span>
+              <span style="transform: translateX(35%);">よく当てはまる</span>
             </div>
           </div>
         </div>
       `,
       choices: ['次へ'],
-      // ボタンを押したときにスライダーの位置（数値）をデータとして保存
       on_finish: function(data) {
         const slider = document.getElementById('vas-slider');
         data.vas_response = slider ? slider.value : 50;
@@ -72,7 +87,6 @@
     });
   });
 
-  // 実験の実行
   jsPsych.run(timeline);
 </script>
 </html>
