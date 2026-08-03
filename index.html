@@ -7,19 +7,26 @@
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
   <link href="https://unpkg.com/@jspsych/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
   <style>
-    /* 全体を画面中央に寄せる */
+    /* 画面全体を完全に中央配置 */
     .jspsych-content-wrapper {
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       min-height: 100vh !important;
     }
-    /* ボタンエリアのデフォルトの左寄せを完全に解除して中央へ */
+    /* jsPsychのコンテンツ幅を固定し、内部を強制的に中央揃えにする */
+    .jspsych-content {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    /* ボタンを完全に中央に配置するスタイル */
     .jspsych-html-button-response-btngroup {
       display: flex !important;
       justify-content: center !important;
-      width: 350px !important;
-      margin: 25px auto 0 auto !important;
+      width: 100% !important;
+      margin-top: 25px !important;
     }
     .jspsych-html-button-response-button button {
       cursor: pointer;
@@ -39,7 +46,7 @@
     { image: "face1.png", prompt: "この人物は信頼できる人物である" },
     { image: "face1.png", prompt: "この人物は親切な人物である" },
     { image: "face1.png", prompt: "この人物は忠誠心のある人物である" },
-    { image: "face2.png", prompt: "この人物は公正な人物である" },
+    { image: "face2.png", prompt: "This人物は公正な人物である" },
     { image: "face2.png", prompt: "この人物は誠実な人物である" },
     { image: "face2.png", prompt: "この人物は信頼できる人物である" },
     { image: "face2.png", prompt: "この人物は親切な人物である" },
@@ -52,27 +59,27 @@
     timeline.push({
       type: jsPsychHtmlButtonResponse,
       stimulus: `
-        <div style="max-width: 450px; margin: auto; text-align: center;">
+        <div style="width: 350px; margin: 0 auto; text-align: center;">
           <!-- 顔画像（上部） -->
           <div style="margin-bottom: 20px;">
             <img src="${item.image}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 4px;">
           </div>
           
           <!-- 質問文 -->
-          <p style="font-size: 18px; font-weight: bold; margin-bottom: 30px;">${item.prompt}</p>
+          <p style="font-size: 18px; font-weight: bold; margin-bottom: 30px; width: 100%;">${item.prompt}</p>
           
           <!-- スライダー部分 -->
-          <div style="margin: 0 auto; width: 350px;">
+          <div style="width: 100%;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
             
             <!-- 0 と 100 をスライダーの両端に配置 -->
-            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 5px;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 5px; width: 100%;">
               <span>0</span>
               <span>100</span>
             </div>
             
             <!-- 全く当てはまらない / よく当てはまる の中心を0と100の真下に合わせる -->
-            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px; width: 100%;">
               <span style="transform: translateX(-35%);">全く当てはまらない</span>
               <span style="transform: translateX(35%);">よく当てはまる</span>
             </div>
