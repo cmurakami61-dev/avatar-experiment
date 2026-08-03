@@ -4,8 +4,6 @@
   <script src="https://unpkg.com/jspsych@7.3.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
-  <!-- ボタン用プラグインの代わりにキー/HTML応答プラグインを使用します -->
   <link href="https://unpkg.com/@jspsych/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
   <style>
     /* 画面全体を完全に中央配置 */
@@ -46,10 +44,10 @@
     { image: "face1.png", prompt: "この人物は誠実な人物である" },
     { image: "face1.png", prompt: "この人物は信頼できる人物である" },
     { image: "face1.png", prompt: "この人物は親切な人物である" },
-    { image: "face1.png", prompt: "This人物は忠誠心のある人物である" },
+    { image: "face1.png", prompt: "この人物は忠誠心のある人物である" },
     { image: "face2.png", prompt: "この人物は公正な人物である" },
     { image: "face2.png", prompt: "この人物は誠実な人物である" },
-    { image: "face2.png", prompt: "ఈ人物は信頼できる人物である" },
+    { image: "face2.png", prompt: "この人物は信頼できる人物である" },
     { image: "face2.png", prompt: "この人物は親切な人物である" },
     { image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
   ];
@@ -58,7 +56,7 @@
 
   experiment_list.forEach(item => {
     timeline.push({
-      type: jsPsychHtmlKeyboardResponse, // キーボード応答プラグインをベースにしつつHTMLで完全構築
+      type: jsPsychHtmlKeyboardResponse,
       stimulus: `
         <div style="width: 350px; margin: 0 auto; text-align: center;">
           <!-- 顔画像（上部） -->
@@ -67,8 +65,13 @@
           </div>
           
           <!-- 質問文 -->
-          <p style="font-size: 18px; font-weight: bold; margin-bottom: 30px; width: 100%;">${item.prompt}</p>
+          <p style="font-size: 18px; font-weight: bold; margin-bottom: 25px; width: 100%;">${item.prompt}</p>
           
+          <!-- 現在の選択値をリアルタイム表示するエリア -->
+          <div style="margin-bottom: 10px; font-size: 16px; font-weight: bold; color: #0066cc;">
+            選択値: <span id="slider-value">50</span>
+          </div>
+
           <!-- スライダー部分 -->
           <div style="width: 100%; margin-bottom: 25px;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
@@ -92,14 +95,19 @@
           </div>
         </div>
       `,
-      choices: "NO_KEYS", // キーボード入力を無効化し、ボタンクリックで進行させる
+      choices: "NO_KEYS",
       on_load: function() {
-        // ボタンがクリックされたときの処理を定義
-        const btn = document.getElementById('next-button');
         const slider = document.getElementById('vas-slider');
-        
+        const valueDisplay = document.getElementById('slider-value');
+        const btn = document.getElementById('next-button');
+
+        // スライダーを動かしたときに数値をリアルタイムで更新
+        slider.addEventListener('input', function() {
+          valueDisplay.textContent = slider.value;
+        });
+
+        // ボタンがクリックされたときの処理
         btn.addEventListener('click', function() {
-          // データを記録して次の試行へ進む
           jsPsych.finishTrial({
             vas_response: slider ? slider.value : 50,
             target_image: item.image,
