@@ -6,20 +6,21 @@
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.2"></script>
   <link href="https://unpkg.com/@jspsych/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css">
   <style>
-    /* 画面全体を完全に中央配置 */
     .jspsych-content-wrapper {
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       min-height: 100vh !important;
+      padding: 20px;
+      box-sizing: border-box;
     }
     .jspsych-content {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
       justify-content: center !important;
+      max-width: 700px;
     }
-    /* 自作の次へボタンのスタイル */
     .next-btn {
       background-color: #f8f9fa;
       border: 1px solid #ccc;
@@ -32,22 +33,123 @@
     .next-btn:hover {
       background-color: #e2e6ea;
     }
+    .consent-box {
+      text-align: left;
+      line-height: 1.6;
+      font-size: 15px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 25px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .consent-box h3 {
+      font-size: 16px;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+    }
+    .consent-box ul {
+      margin-top: 5px;
+      padding-left: 20px;
+    }
   </style>
 </head>
 <body></body>
 <script>
   const jsPsych = initJsPsych();
 
-  // 画像と設問のリスト（6番目にアテンション・チェック問題を追加）
+  let timeline = [];
+
+  // ==========================================
+  // 1. インフォームド・コンセント（説明と同意）画面
+  // ==========================================
+  timeline.push({
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div style="width: 100%; max-width: 650px; margin: 0 auto;">
+        <div class="consent-box">
+          <p>このたびは調査にご協力いただき、誠にありがとうございます。<br>
+          以下の内容をよくお読みになり、十分に理解していただいたうえで、アンケートへの回答を進めて下さい。<br>
+          ご協力よろしくお願いいたします。</p>
+
+          <h3>調査実施者</h3>
+          <p>
+            調査実施者：村上 知寛（立命館大学総合心理学部4回生）<br>
+            指導教員 ：永井 聖剛（立命館大学総合心理学部）
+          </p>
+          <p>
+            <strong>連絡先</strong><br>
+            e-mail：cp0231hs@ed.ritsumei.ac.jp<br>
+            電話番号：090-5179-5458
+          </p>
+
+          <h3>本調査について</h3>
+          <ul>
+            <li>本調査は、現在私が卒業研究として進めている、アバター操作による自己顔イメージの変化を検討する研究において、作成された自己顔イメージの画像が第三者に抱かせる印象を調査することを目的としています。</li>
+            <li>本調査の回答に要する時間はおよそ10分（仮）です。</li>
+          </ul>
+
+          <h3>調査の形式と回答方法</h3>
+          <ul>
+            <li>画面に提示される顔画像を見て、各質問文に対してどの程度当てはまるかをスライダー（0〜100）を用いて評価してください。</li>
+            <li>スライダーを動かして数値を決定後、「次へ」を押すことで次の設問へ進みます。</li>
+            <li>正解・不正解はありませんので、深く考えすぎず直感でお答えください。</li>
+          </ul>
+
+          <h3>注意事項</h3>
+          <ul>
+            <li>本調査へのご回答は統計的に処理され、個人が特定されることはありません。また、本調査によって得られたデータは本研究以外の目的には使用せず、研究終了後は適切に廃棄されます。</li>
+            <li>本調査にご回答いただいたデータは卒業論文に掲載させていただく場合がございます。</li>
+            <li>本調査への参加は強制ではなく、調査に参加されない場合や本ページで同意した後に途中で参加を辞退された場合にもあなたが一切の不利益を被ることはありません。</li>
+          </ul>
+
+          <p style="margin-top: 15px;">
+            上記をお読みになり、本アンケートの趣旨をご理解いただき、アンケートへの回答に同意していただける場合には、「同意する」を選択し、アンケートへの回答を開始してください。ご協力よろしくお願いいたします。
+          </p>
+
+          <div style="margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #eee; text-align: center;">
+            <label style="margin-right: 20px; cursor: pointer;">
+              <input type="radio" name="consent" value="agree"> 同意する
+            </label>
+            <label style="cursor: pointer;">
+              <input type="radio" name="consent" value="disagree"> 同意しない
+            </label>
+          </div>
+        </div>
+
+        <button type="button" id="consent-btn" class="next-btn">進む</button>
+      </div>
+    `,
+    choices: "NO_KEYS",
+    on_load: function() {
+      const btn = document.getElementById('consent-btn');
+      btn.addEventListener('click', function() {
+        const checked = document.querySelector('input[name="consent"]:checked');
+        if (!checked) {
+          alert('「同意する」または「同意しない」のいずれかを選択してください。');
+          return;
+        }
+        if (checked.value === 'disagree') {
+          jsPsych.endExperiment('<p style="font-size:18px;">同意いただけない場合は、ここで終了となります。<br>ご協力ありがとうございました。ブラウザを閉じてください。</p>');
+        } else {
+          jsPsych.finishTrial({ consent: true });
+        }
+      });
+    }
+  });
+
+  // ==========================================
+  // 2. 実験リストの定義
+  // ==========================================
   const experiment_list = [
     { type: "face", image: "face1.png", prompt: "この人物は公正な人物である" },
     { type: "face", image: "face1.png", prompt: "この人物は誠実な人物である" },
     { type: "face", image: "face1.png", prompt: "この人物は信頼できる人物である" },
     { type: "face", image: "face1.png", prompt: "この人物は親切な人物である" },
     { type: "face", image: "face1.png", prompt: "この人物は忠誠心のある人物である" },
-    // --- 【6番目】アテンション・チェック問題 ---
     { type: "check", prompt: "ここではスライダーを操作して「75」となるように回答してください。" },
-    // ----------------------------------------
     { type: "face", image: "face2.png", prompt: "この人物は公正な人物である" },
     { type: "face", image: "face2.png", prompt: "この人物は誠実な人物である" },
     { type: "face", image: "face2.png", prompt: "この人物は信頼できる人物である" },
@@ -55,72 +157,56 @@
     { type: "face", image: "face2.png", prompt: "この人物は忠誠心のある人物である" }
   ];
 
-  let timeline = [];
-
+  // ==========================================
+  // 3. 試行の生成
+  // ==========================================
   experiment_list.forEach(item => {
-    // 画面に表示するHTMLを「通常の問題」と「チェック問題」で分岐させます
     let stimulus_html = "";
 
     if (item.type === "check") {
-      // チェック問題用のレイアウト（画像なし、特別な教示文）
       stimulus_html = `
         <div style="width: 380px; margin: 0 auto; text-align: center;">
-          <!-- 教示文を目立つように表示 -->
           <p style="font-size: 17px; font-weight: bold; line-height: 1.5; margin-bottom: 30px; width: 100%; color: #d9534f;">${item.prompt}</p>
-          
-          <!-- 現在の選択値リアルタイム表示 -->
           <div style="margin-bottom: 10px; font-size: 16px; font-weight: bold; color: #0066cc;">
             選択値: <span id="slider-value">50</span>
           </div>
-
-          <!-- スライダー部分 -->
           <div style="width: 100%; margin-bottom: 25px;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
-            
             <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 5px; width: 100%;">
               <span>0</span>
               <span>100</span>
             </div>
-            
             <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px; width: 100%;">
               <span style="transform: translateX(-35%);">全く当てはまらない</span>
               <span style="transform: translateX(35%);">よく当てはまる</span>
             </div>
           </div>
-
           <div>
             <button type="button" id="next-button" class="next-btn">次へ</button>
           </div>
         </div>
       `;
     } else {
-      // 通常の問題用のレイアウト（顔画像あり）
       stimulus_html = `
         <div style="width: 350px; margin: 0 auto; text-align: center;">
           <div style="margin-bottom: 20px;">
             <img src="${item.image}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 4px;">
           </div>
-          
           <p style="font-size: 18px; font-weight: bold; margin-bottom: 25px; width: 100%;">${item.prompt}</p>
-          
           <div style="margin-bottom: 10px; font-size: 16px; font-weight: bold; color: #0066cc;">
             選択値: <span id="slider-value">50</span>
           </div>
-
           <div style="width: 100%; margin-bottom: 25px;">
             <input type="range" id="vas-slider" name="vas" value="50" min="0" max="100" style="width: 100%; cursor: pointer;">
-            
             <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 5px; width: 100%;">
               <span>0</span>
               <span>100</span>
             </div>
-            
             <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 2px; width: 100%;">
               <span style="transform: translateX(-35%);">全く当てはまらない</span>
               <span style="transform: translateX(35%);">よく当てはまる</span>
             </div>
           </div>
-
           <div>
             <button type="button" id="next-button" class="next-btn">次へ</button>
           </div>
